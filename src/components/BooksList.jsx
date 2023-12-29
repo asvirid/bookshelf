@@ -1,23 +1,39 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../index.css"; // Import CSS file for component styling
+import LogoutButton from "./Logout";
+import { db } from "../firebase"; // Adjust this path as needed
+import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { useAuthState } from "react-firebase-hooks/auth"; // If you're using react-firebase-hooks
+import { auth } from "../firebase"; // Adjust this path as needed
+import Button from "react-bootstrap/Button";
 
+//Main component fetching books by search input
 function BooksList() {
+  const [user] = useAuthState(auth);
   const [searchTerm, setSearchTerm] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [searchedImages, setSearchedImages] = useState([]);
   const [confirmedImage, setConfirmedImage] = useState("");
 
   useEffect(() => {
-    const storedImages = localStorage.getItem("searchedImages");
-    if (storedImages) {
-      setSearchedImages(JSON.parse(storedImages));
-    }
-  }, []);
+    if (user) {
+      const fetchImages = async () => {
+        const imagesRef = collection(db, "userImages", user.uid, "images");
+        const q = query(imagesRef);
+        const querySnapshot = await getDocs(q);
 
-  useEffect(() => {
-    localStorage.setItem("searchedImages", JSON.stringify(searchedImages));
-  }, [searchedImages]);
+        if (querySnapshot.empty) {
+          setSearchedImages([]);
+        } else {
+          const images = querySnapshot.docs.map((doc) => doc.data().imageUrl);
+          setSearchedImages(images);
+        }
+      };
+
+      fetchImages().catch(console.error);
+    }
+  }, [user]);
 
   const handleImageSearch = async () => {
     try {
@@ -35,11 +51,20 @@ function BooksList() {
     }
   };
 
-  const handleConfirmImage = () => {
-    if (imageUrl) {
-      setSearchedImages((prevImages) => [...prevImages, imageUrl]);
+  const handleConfirmImage = async () => {
+    if (imageUrl && user) {
+      const newImageList = [...searchedImages, imageUrl];
+      setSearchedImages(newImageList);
       setConfirmedImage(imageUrl);
       setImageUrl(""); // Reset the imageUrl state after confirming
+
+      try {
+        await addDoc(collection(db, "userImages", user.uid, "images"), {
+          imageUrl: imageUrl,
+        });
+      } catch (error) {
+        console.error("Error adding image to Firestore: ", error);
+      }
     }
   };
 
@@ -51,14 +76,20 @@ function BooksList() {
 
   return (
     <div className="books-list">
-      <h1>My library</h1>
+      <header>
+        <LogoutButton />
+      </header>
+      <h1 className="title">Add finished books</h1>
       <div className="search-container">
         <input
+          className="search-bar"
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <button onClick={handleImageSearch}>Search book</button>
+        <Button variant="outline-primary" onClick={handleImageSearch}>
+          Search book
+        </Button>{" "}
       </div>
       {imageUrl && !confirmedImage && (
         <div className="current-image">
@@ -75,16 +106,20 @@ function BooksList() {
         </div>
       )}
       <div className="previous-images">
-        <h2>Bookshelf </h2>
+        <h2 className="title">My bookshelf:</h2>
         <div className="image-list">
-          {searchedImages.map((image, index) => (
-            <img
-              src={image}
-              alt={`Searched Image ${index + 1}`}
-              key={index}
-              className="previous-image"
-            />
-          ))}
+          {searchedImages.length > 0 ? (
+            searchedImages.map((image, index) => (
+              <img
+                src={image}
+                alt={`Searched Image ${index + 1}`}
+                key={index}
+                className="previous-image"
+              />
+            ))
+          ) : (
+            <p>No images found. Start searching and add some!</p>
+          )}
         </div>
       </div>
     </div>

@@ -1,10 +1,12 @@
 .books-list {
   width: 500px;
   margin: auto;
+  margin-top: 10vh;
 }
 
 .search-container {
-  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
 }
 
 .current-image img,
@@ -26,4 +28,42 @@
   width: 100px;
   height: 140px;
   margin: 5px;
+}
+
+.login-section,
+.no_signup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 0vh;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40vh;
+  font-size: 70px;
+  font-weight: 600;
+  background-image: linear-gradient(to bottom left, #553c9a, #ee4b2b);
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 600;
+  background-image: linear-gradient(to left, #553c9a, #b393d3);
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.search-bar {
+  margin-right: 10px;
+}
+
+header {
+  text-align: right;
 }
