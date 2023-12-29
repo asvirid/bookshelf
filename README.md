@@ -2,7 +2,7 @@
 
 Bookshelf is a react app for keeping track of your finished books.
 It uses Google API to fetch a visual based on the title of your book and stores it together with the rest of the books you searcged for an added to your bookshelf. The app supports user authentication and personalized user database via Firebase.
-https://capture.dropbox.com/00voWNYlgiZr6Z8y
+![img](bookshelf/src/assets/bookshelf.png)
 
 ## Installation
 
